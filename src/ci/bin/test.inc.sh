@@ -532,7 +532,14 @@ cromwell::private::setup_prior_version_resources() {
         grep 'val cromwellVersion' "${CROMWELL_BUILD_ROOT_DIRECTORY}/project/Version.scala" \
         | awk -F \" '{print $2}' \
         )"
-    prior_version=$((current_version - 1))
+
+    # This function should only ever run on Travis PR builds where TRAVIS_PULL_REQUEST_BRANCH is set.
+    # https://stackoverflow.com/questions/229551/how-to-check-if-a-string-contains-a-substring-in-bash
+    if [ -z "${TRAVIS_PULL_REQUEST_BRANCH##*_hotfix}" ]; then
+      prior_version="$current_version"
+    else
+      prior_version=$((current_version - 1))
+    fi
 
     CROMWELL_BUILD_CROMWELL_PRIOR_VERSION_JAR="${CROMWELL_BUILD_RESOURCES_DIRECTORY}/cromwell_${prior_version}.jar"
     export CROMWELL_BUILD_CROMWELL_PRIOR_VERSION_JAR
